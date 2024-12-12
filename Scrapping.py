@@ -1,52 +1,68 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.service import Service  # Ensure this import is present
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import time
 import requests
+import time
 
 # Initialize WebDriver
-def initialize_driver(chrome_driver_path):
-    service = Service(chrome_driver_path)
+def initialize_driver(chrome_driver_path, headless=False):
+    service = Service(chrome_driver_path)  # Use the Service class to specify the chromedriver path
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
-    options.add_argument("--disable-gpu")
+    
+    if headless:
+        options.add_argument("--headless")  # Run in headless mode
+        options.add_argument("--disable-gpu")
+    
     return webdriver.Chrome(service=service, options=options)
 
 
 # Scrape Amazon
-def scrape_amazon(search_query, chrome_driver_path, max_pages=1):
+def scrape_amazon(search_query, chrome_driver_path, max_pages=3):
     driver = initialize_driver(chrome_driver_path)
-    base_url = f"https://www.amazon.com/s?k={search_query}"
-    driver.get(base_url)
-    all_data = []
+    driver.get(f"https://www.amazon.com/s?k={search_query}")
 
+    all_data = []
     for page in range(max_pages):
         try:
+            # Wait for product containers to load
             WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@class, "s-main-slot")]/div'))
             )
             product_containers = driver.find_elements(By.XPATH, '//div[contains(@class, "s-main-slot")]/div')
 
-            for container in product_containers[:5]:  # Limit to top 5 results per page
+            # Extract product links
+            product_links = []
+            for container in product_containers:
                 try:
-                    name = container.find_element(By.XPATH, './/h2/a/span').text
-                    price = container.find_element(By.XPATH, './/span[@class="a-price-whole"]').text
-                    rating = container.find_element(By.XPATH, './/span[@class="a-icon-alt"]').text
-                    link = container.find_element(By.XPATH, './/h2/a').get_attribute("href")
-                    all_data.append({"Website": "Amazon", "Name": name, "Price": price, "Rating": rating, "Link": link})
-                except Exception:
-                    continue
+                    link = container.find_element(By.XPATH, './/a[@class="a-link-normal s-no-outline"]').get_attribute("href")
+                    product_links.append(link)
+                except Exception as e:
+                    print(f"Skipping a container due to missing element: {e}")
 
+            # Extract details from each product link
+            for link in product_links:
+                driver.get(link)
+                try:
+                    name = driver.find_element(By.ID, 'productTitle').text
+                    price = driver.find_element(By.XPATH, '//span[@class="a-price-whole"]').text
+                    rating = driver.find_element(By.XPATH, '//span[@class="a-icon-alt"]').text
+                    all_data.append({"Website": "Amazon", "Name": name, "Price": price, "Rating": rating, "Link": link})
+                except Exception as e:
+                    print(f"Error extracting product details: {e}")
+
+            # Navigate to the next page
             try:
                 next_button = driver.find_element(By.XPATH, '//a[contains(@class, "s-pagination-next")]')
                 next_button.click()
-                time.sleep(2)
             except Exception:
+                print("No more pages to scrape.")
                 break
-        except Exception:
+
+        except Exception as e:
+            print(f"Error on page {page + 1}: {e}")
             break
 
     driver.quit()
@@ -71,43 +87,53 @@ def scrape_ebay(search_query, max_pages=1):
                 link = item.select_one(".s-item__link")["href"]
                 rating = item.select_one(".x-star-rating").text if item.select_one(".x-star-rating") else "No rating"
                 all_data.append({"Website": "eBay", "Name": name, "Price": price, "Rating": rating, "Link": link})
-            except Exception:
+            except Exception as e:
+                print(f"Error scraping eBay product: {e}")
                 continue
 
     return all_data
 
 
 # Scrape Flipkart
-def scrape_flipkart(search_query, chrome_driver_path, max_pages=1):
+def scrape_flipkart(search_query, chrome_driver_path, max_pages=3):
     driver = initialize_driver(chrome_driver_path)
-    base_url = f"https://www.flipkart.com/search?q={search_query}"
-    driver.get(base_url)
-    all_data = []
+    driver.get(f"https://www.flipkart.com/search?q={search_query}")
 
+    all_data = []
     for page in range(max_pages):
         try:
+            # Wait for product containers to load
             WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@class, "_1AtVbE")]'))
             )
             product_containers = driver.find_elements(By.XPATH, '//div[contains(@class, "_1AtVbE")]')
 
-            for container in product_containers[:5]:  # Limit to top 5 results per page
+            # Extract details from each product container
+            for container in product_containers:
                 try:
+                    # Extract product details
                     name = container.find_element(By.XPATH, './/div[contains(@class, "_4rR01T")]').text
                     price = container.find_element(By.XPATH, './/div[contains(@class, "_30jeq3")]').text
                     rating = container.find_element(By.XPATH, './/div[contains(@class, "_3LWZlK")]').text
                     link = container.find_element(By.XPATH, './/a').get_attribute("href")
                     all_data.append({"Website": "Flipkart", "Name": name, "Price": price, "Rating": rating, "Link": link})
-                except Exception:
+                except Exception as e:
+                    print(f"Error scraping Flipkart product: {e}")
                     continue
 
+            # Navigate to the next page if available
             try:
                 next_button = driver.find_element(By.XPATH, '//a[contains(@class, "_1LKTO3")]')
                 next_button.click()
-                time.sleep(2)
+                WebDriverWait(driver, 3).until(
+                    EC.presence_of_all_elements_located((By.XPATH, '//div[contains(@class, "_1AtVbE")]'))
+                )  # Wait for the next page to load
             except Exception:
+                print("No more pages to scrape.")
                 break
-        except Exception:
+
+        except Exception as e:
+            print(f"Error on page {page + 1}: {e}")
             break
 
     driver.quit()
@@ -127,18 +153,28 @@ def search_multiple_websites(search_query, chrome_driver_path, max_pages=1):
 def display_results(all_results):
     print("\nAggregated Results from All Websites:")
     for result in all_results:
-        print(f"\nWebsite: {result['Website']}")
-        print(f"Name: {result['Name']}")
-        print(f"Price: {result['Price']}")
-        print(f"Rating: {result['Rating']}")
-        print(f"Link: {result['Link']}")
+        # Check if all required keys are present, else use default values
+        website = result.get('Website', 'N/A')
+        name = result.get('Name', 'N/A')
+        price = result.get('Price', 'N/A')
+        rating = result.get('Rating', 'N/A')
+        link = result.get('Link', 'N/A')
+
+        # Print the result details
+        print(f"\nWebsite: {website}")
+        print(f"Name: {name}")
+        print(f"Price: {price}")
+        print(f"Rating: {rating}")
+        print(f"Link: {link}")
+
 
 # Main Execution
 if __name__ == "__main__":
-    chrome_driver_path ="C:/Users/MUNIYA/Downloads/chromedriver-win64/chromedriver.exe" # Replace with your ChromeDriver path
+    chrome_driver_path = "C:/Users/MUNIYA/Downloads/chromedriver-win64/chromedriver.exe"  # Replace with your ChromeDriver path
     search_query = "laptop"  # Example search
     max_pages = 1
 
+    # Set headless to False for visual inspection in Chrome
     results = search_multiple_websites(search_query, chrome_driver_path, max_pages)
 
     display_results(results)

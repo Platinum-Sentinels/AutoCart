@@ -1,7 +1,9 @@
 import openai
 import speech_recognition as sr
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 # Set OpenAI API key
 openai.api_key = os.getenv('OPENAI_KEY')
 # Function for voice recognition

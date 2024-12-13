@@ -163,7 +163,7 @@ def display_results(all_results):
 
 # Main Execution
 if __name__ == "__main__":
-    chrome_driver_path = "C:/Users/MUNIYA/Downloads/chromedriver-win64/chromedriver.exe"  # Replace with your ChromeDriver path
+    chrome_driver_path = "D:\CODEX\MachineLearning\chromedriver-win64/chromedriver.exe"  # Replace with your ChromeDriver path
     search_query = "msi katana gf66"  # Example search
     max_pages = 1
 
@@ -171,3 +171,4 @@ if __name__ == "__main__":
     results = search_multiple_websites(search_query, chrome_driver_path, max_pages)
 
     display_results(results)
+    

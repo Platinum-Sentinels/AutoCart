@@ -9,7 +9,7 @@ export default function Sidebar() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/search', label: 'Search', icon: Search },
     { href: '/search-history', label: 'Search History', icon: Clock },
-    { href: '/user-info', label: 'User Info', icon: User },
+    { href: '/user-profile', label: 'User Info', icon: User },  // Fixed here
     { href: '/login', label: 'Login', icon: LogIn },
     { href: '/signup', label: 'Sign Up', icon: UserPlus },
   ];

@@ -1,23 +1,21 @@
-'use client'
-
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from 'react-router-dom' // Correct import for React Router
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import Link from 'next/link'
+import { Link } from 'react-router-dom' // Use Link from React Router
 
 export default function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const router = useRouter()
+  const navigate = useNavigate() // Use useNavigate for navigation
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log('Signup attempt with:', { name, email, password })
-    router.push('/')
+    navigate('/') // Navigate to home page after successful signup
   }
 
   return (
@@ -64,7 +62,7 @@ export default function SignupPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link to="/login" className="text-primary hover:underline">
               Log in
             </Link>
           </p>
@@ -73,4 +71,3 @@ export default function SignupPage() {
     </Card>
   )
 }
-

@@ -1,10 +1,7 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
 
 interface Product {
   id: string
@@ -76,7 +73,8 @@ export default function LatestProductsBanner() {
         </div>
         <div className="flex items-center space-x-6">
           <div className="flex-shrink-0">
-            <Image
+            {/* Use a standard img tag instead of next/image */}
+            <img
               src={currentProduct.imageUrl}
               alt={currentProduct.name}
               width={200}
@@ -104,4 +102,3 @@ export default function LatestProductsBanner() {
     </Card>
   )
 }
-

@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { Request, Response } from "express";
 
-export async function POST(request: Request) {
-  const body = await request.json();
+export async function searchHandler(req: Request, res: Response) {
+  const body = req.body;
   console.log("Search params received:", body);
 
   // Here you would typically:
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     { id: "3", query: "Best laptop for programming", date: "2023-05-25" },
   ];
 
-  return NextResponse.json({
+  res.json({
     results: mockResults,
     searchHistory: mockSearchHistory,
   });

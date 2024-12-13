@@ -1,11 +1,11 @@
-import { Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
-import HomePage from './pages/HomePage'
-import SearchPage from './pages/SearchPage'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import UserInfoPage from './pages/UserInfoPage'
-import SearchHistoryPage from './pages/SearchHistoryPage'
+import { Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import HomePage from "./pages/HomePage";
+import SearchPage from "./pages/SearchPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import UserInfoPage from "./pages/UserInfoPage";
+import SearchHistoryPage from "./pages/SearchHistoryPage";
 
 function App() {
   return (
@@ -19,8 +19,7 @@ function App() {
         <Route path="/search-history" element={<SearchHistoryPage />} />
       </Routes>
     </Layout>
-  )
+  );
 }
 
-export default App
-
+export default App;

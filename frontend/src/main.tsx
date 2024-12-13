@@ -4,8 +4,8 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { Auth0Provider } from '@auth0/auth0-react'
 import { Toaster } from 'sonner'
-import App from './App'
-import './index.css'
+import App from './App'; // Import the App component
+import './globals.css'
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -1,10 +1,13 @@
-import { Link, useLocation } from 'react-router-dom'
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Home, Search, User, LogIn, UserPlus, Clock } from 'lucide-react'
 
 export default function Sidebar() {
-  const location = useLocation()
+  const pathname = usePathname()
 
   const links = [
     { href: '/', label: 'Home', icon: Home },
@@ -22,11 +25,11 @@ export default function Sidebar() {
           <Button
             key={link.href}
             asChild
-            variant={location.pathname === link.href ? "secondary" : "ghost"}
+            variant={pathname === link.href ? "secondary" : "ghost"}
             className="w-full justify-start"
             size="sm"
           >
-            <Link to={link.href}>
+            <Link href={link.href}>
               <link.icon className="mr-2 h-4 w-4" />
               {link.label}
             </Link>
